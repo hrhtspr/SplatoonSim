@@ -22,17 +22,21 @@ namespace SplatoonSim
         public int UdemaePoint = 30;
         public double Strength;
         public bool isBattle;
+        public int WinCount;
+        public int LoseCount;
+        public double WinRatio { get { return (double)WinCount / ((double)WinCount + LoseCount); } }
 
         public Player(double strength)
         {
             Strength = strength;
         }
 
-        public void ChengePoint(bool isWin)
+        public void ChengePoint(bool isWin, int distance)
         {
             if (isWin)
             {
-                UdemaePoint += WinBasePoint[(int)Udemae];
+                UdemaePoint += WinBasePoint[(int)Udemae] + (distance / 2) * 2;
+                WinCount++;
                 if (UdemaePoint >= 100)
                 {
                     RankUp();
@@ -40,7 +44,8 @@ namespace SplatoonSim
             }
             else
             {
-                UdemaePoint -= LoseBasePoint[(int)Udemae];
+                UdemaePoint -= LoseBasePoint[(int)Udemae] + (distance / 2) * 2;
+                LoseCount++;
                 if (UdemaePoint < 0)
                 {
                     RankDown();

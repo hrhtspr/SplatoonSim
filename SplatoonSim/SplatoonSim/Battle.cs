@@ -34,17 +34,9 @@ namespace SplatoonSim
         public bool CanJoin(Udemae udemae)
         {
             if (IsFull) return false;
-            if (Udemae == udemae) return true;
-            switch (udemae)
-            {
-                case Udemae.Aminus:
-                    return Udemae == SplatoonSim.Udemae.A;
-                case Udemae.A:
-                    return Udemae == SplatoonSim.Udemae.Aminus;
-                case Udemae.Aplus:
-                    return (int)Udemae >= (int)Udemae.Bplus;
-            }
-            return false;
+            var i = (int)udemae - (int)Udemae;
+            return i >= 0 && i <= 3;
+            
         }
 
         public void Join(Player player)
@@ -77,10 +69,11 @@ namespace SplatoonSim
             int win, lose;
             if (team0Strength >= team1Strength) { win = 0; lose = 1; }
             else { win = 1; lose = 0; }
+            var dist = Teams[lose].Sum(p => (int)Players[p].Udemae)-Teams[win].Sum(p => (int)Players[p].Udemae);
             for (int i = 0; i < 4; i++)
             {
-                Players[Teams[win][i]].ChengePoint(true);
-                Players[Teams[lose][i]].ChengePoint(false);
+                Players[Teams[win][i]].ChengePoint(true,dist);
+                Players[Teams[lose][i]].ChengePoint(false,dist);
             }
             Count++;
             Leave();

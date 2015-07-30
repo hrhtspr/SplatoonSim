@@ -24,6 +24,9 @@ namespace SplatoonSim
                     var min = double.MaxValue;
                     var max = double.MinValue;
                     var ave = 0.0;
+                    var ratioMin = 1.0;
+                    var ratioMax = 0.0;
+                    var ratioave = 0.0;
                     var i = 0;
                     foreach (var p in sim.Players.Where(p => p.Udemae == (Udemae)item))
                     {
@@ -31,12 +34,20 @@ namespace SplatoonSim
                         min = Math.Min(min, p.Strength);
                         max = Math.Max(max, p.Strength);
                         ave += p.Strength;
+                        ratioMin = Math.Min(ratioMin,p.WinRatio);
+                        ratioMax = Math.Max(ratioMax,p.WinRatio);
+                        ratioave += p.WinRatio;
                     }
                     if (i != 0)
                     {
                         ave /= i;
+                        ratioave /= i;
                     }
-                    Console.WriteLine("{0}:{1}({2},{3},{4})", item.ToString(), i, min, ave, max);
+                    else
+                    {
+                        min = max = ratioMin = ratioMax = 0.0;
+                    }
+                    Console.WriteLine("{0}:{1}({2:0.0},{3:0.0},{4:0.0})({5:0.000},{6:0.000},{7:0.000})", item.ToString(), i, min, ave, max,ratioMin,ratioave,ratioMax);
                 }
                 string s = "";
                 while (true)
@@ -51,6 +62,27 @@ namespace SplatoonSim
                                 for (int i = 0; i < PlayerCount; i++)
                                 {
                                     sw.WriteLine("{0},{1},{2}",sim.Players[i].Udemae,sim.Players[i].UdemaePoint,sim.Players[i].Strength);
+                                }
+                            }
+                        }
+                    }
+                    else if (s == "h")
+                    {
+                        int m = (int)Math.Ceiling(sim.Players.Max(p => Math.Abs(p.Strength))/10);
+                        var hists = Enumerable.Range(-m,2*m).ToDictionary(p=>p,q=>Enum.GetValues(typeof(Udemae)).Cast<Udemae>().ToDictionary(p=>p,p=>0));
+                        for (int i = 0; i < PlayerCount; i++)
+                        {
+                            hists[(int)Math.Ceiling(sim.Players[i].Strength / 10)][sim.Players[i].Udemae]++;
+                        }
+                        using (var st = new FileStream("hist" + phase + ".csv", FileMode.Create))
+                        {
+                            using (var sw = new StreamWriter(st))
+                            {
+                                sw.WriteLine("Udemae,{0}", string.Join(",", Enum.GetValues(typeof(Udemae))).Cast<Udemae>());
+                                foreach (var item in hists)
+                                {
+                                    var log = (item.Key*10).ToString()+","+string.Join(",",item.Value.Values);
+                                    sw.WriteLine(log);
                                 }
                             }
                         }
@@ -81,12 +113,12 @@ namespace SplatoonSim
         }
 
         public const int PhaseTime = 50;
-        public const double PlayerResetProbability = 1;
+        public const double PlayerResetProbability = 0;
         public const int RoomMax = PlayerCount;
         public void SimlationOnePhase()
         {
             Battles.Clear();
-            Parallel.For(0, PlayerCount, (i) => { Players[i].isBattle = false; });
+            Parallel.For(0, PlayerCount, (i) => { Players[i].isBattle = false;});
 
             if (GB.Random.NextDouble() < PlayerResetProbability)
             {
