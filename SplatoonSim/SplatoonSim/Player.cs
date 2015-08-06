@@ -10,52 +10,61 @@ namespace SplatoonSim
     {
         Cminus, C, Cplus,
         Bminus, B, Bplus,
-        Aminus, A, Aplus
+        Aminus, A, Aplus,
+        S,Splus
     }
     public class Player
     {
-        public static List<int> WinBasePoint = new List<int>(new[] { 20, 15, 12, 10, 10, 10, 10, 10, 10 });
-        public static List<int> LoseBasePoint = new List<int>(Enumerable.Repeat(10, 9));
+        public static List<int> WinBasePoint = new List<int>(new[] { 20, 15, 12, 10, 10, 10, 10, 10, 10,0,5 });
+        public static List<int> LoseBasePoint = new List<int>(Enumerable.Repeat(10,9).Concat(new[] {31,2}));
 
 
         public Udemae Udemae = Udemae.Cminus;
-        public int UdemaePoint = 30;
+        public int UdemaePoint = 0;
         public double Strength;
         public bool isBattle;
-        public int WinCount;
-        public int LoseCount;
-        public double WinRatio { get { return (double)WinCount / ((double)WinCount + LoseCount); } }
+        public Queue<bool> WinLose;
+        public const int Count = 100;
+        public double WinRatio { get { return (double)WinLose.Count(p=>p) / ((double)WinLose.Count); } }
 
         public Player(double strength)
         {
             Strength = strength;
+            WinLose = new Queue<bool>();
         }
 
-        public void ChengePoint(bool isWin, int distance)
+        public bool ChengePoint(bool isWin, int distance)
         {
+            bool re = false;
             if (isWin)
             {
-                UdemaePoint += WinBasePoint[(int)Udemae] + (distance / 2) * 2;
-                WinCount++;
+                UdemaePoint += WinBasePoint[(int)Udemae];// +(distance / 3) * 2;
                 if (UdemaePoint >= 100)
                 {
                     RankUp();
+                    re = true;
                 }
             }
             else
             {
-                UdemaePoint -= LoseBasePoint[(int)Udemae] + (distance / 2) * 2;
-                LoseCount++;
+                UdemaePoint -= LoseBasePoint[(int)Udemae];// +(distance / 3) * 2;
                 if (UdemaePoint < 0)
                 {
                     RankDown();
+                    re = true;
                 }
             }
+            WinLose.Enqueue(isWin);
+            while (WinLose.Count > Count)
+            {
+                WinLose.Dequeue();
+            }
+            return re;
         }
 
         public void RankUp()
         {
-            if (Udemae == SplatoonSim.Udemae.Aplus)
+            if (Udemae == SplatoonSim.Udemae.Splus)
             {
                 UdemaePoint = 99;
             }
@@ -88,5 +97,6 @@ namespace SplatoonSim
         {
             isBattle = false;
         }
+
     }
 }

@@ -36,21 +36,28 @@ namespace SplatoonSim
             if (IsFull) return false;
             var i = (int)udemae - (int)Udemae;
             return i >= 0 && i <= 3;
-            
+
         }
 
-        public void Join(Player player)
+        public bool Join(Player player)
         {
+            bool re = false;
             for (int i = 0; i < 8; i++)
             {
                 if (Players[i] == null)
                 {
                     Players[i] = player;
+                    re = true;
                     break;
                 }
             }
-            player.JoinBattle(this);
-            isFull = Players.Count(p => p != null) == 8;
+            if (re)
+            {
+                player.JoinBattle(this);
+                isFull = Players.Count(p => p != null) == 8;
+            }
+
+            return re;
         }
         public void MakeTeam()
         {
@@ -69,28 +76,37 @@ namespace SplatoonSim
             int win, lose;
             if (team0Strength >= team1Strength) { win = 0; lose = 1; }
             else { win = 1; lose = 0; }
-            var dist = Teams[lose].Sum(p => (int)Players[p].Udemae)-Teams[win].Sum(p => (int)Players[p].Udemae);
+            var dist = Teams[lose].Sum(p => (int)Players[p].Udemae) - Teams[win].Sum(p => (int)Players[p].Udemae);
             for (int i = 0; i < 4; i++)
             {
-                Players[Teams[win][i]].ChengePoint(true,dist);
-                Players[Teams[lose][i]].ChengePoint(false,dist);
+
+                if (Players[Teams[win][i]].ChengePoint(true, dist))
+                {
+                    Players[Teams[win][i]].LeaveBattle(this);
+                    Players[Teams[win][i]] = null;
+                };
+                if (Players[Teams[lose][i]].ChengePoint(false, dist))
+                {
+                    Players[Teams[lose][i]].LeaveBattle(this);
+                    Players[Teams[lose][i]] = null;
+                }
             }
             Count++;
             Leave();
         }
 
-        public const double LeaveProbabilyty = 0.3;
+        public const double LeaveProbabilyty = 0.2;
         public void Leave()
         {
             for (int i = 0; i < 8; i++)
             {
-                if (GB.Random.NextDouble() < LeaveProbabilyty)
+                if (Players[i] != null && GB.Random.NextDouble() < LeaveProbabilyty)
                 {
                     Players[i].LeaveBattle(this);
                     Players[i] = null;
                 }
             }
-                        isFull = Players.Count(p => p != null) == 8;
+            isFull = Players.Count(p => p != null) == 8;
 
         }
     }
