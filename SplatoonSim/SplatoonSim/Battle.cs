@@ -76,16 +76,17 @@ namespace SplatoonSim
             int win, lose;
             if (team0Strength >= team1Strength) { win = 0; lose = 1; }
             else { win = 1; lose = 0; }
-            var dist = Teams[lose].Sum(p => (int)Players[p].Udemae) - Teams[win].Sum(p => (int)Players[p].Udemae);
+            var winUdemaes = Teams[win].Select(p=>Players[p].Udemae).ToArray();
+            var loseUdemaes = Teams[lose].Select(p => Players[p].Udemae).ToArray();
             for (int i = 0; i < 4; i++)
             {
 
-                if (Players[Teams[win][i]].ChengePoint(true, dist))
+                if (Players[Teams[win][i]].ChengePoint(true, winUdemaes,loseUdemaes))
                 {
                     Players[Teams[win][i]].LeaveBattle(this);
                     Players[Teams[win][i]] = null;
                 };
-                if (Players[Teams[lose][i]].ChengePoint(false, dist))
+                if (Players[Teams[lose][i]].ChengePoint(false, winUdemaes,loseUdemaes))
                 {
                     Players[Teams[lose][i]].LeaveBattle(this);
                     Players[Teams[lose][i]] = null;
