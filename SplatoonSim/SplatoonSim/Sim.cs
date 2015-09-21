@@ -64,10 +64,10 @@ namespace SplatoonSim
                         {
                             using (var sw = new StreamWriter(st))
                             {
-                                sw.WriteLine("Udemae,Point,Strength,WinRatio");
+                                sw.WriteLine("Udemae,Point,Strength,WinRatio,IsCountStop");
                                 for (int i = 0; i < PlayerCount; i++)
                                 {
-                                    sw.WriteLine("{0},{1},{2},{3}", sim.Players[i].Udemae, sim.Players[i].UdemaePoint, sim.Players[i].Strength, sim.Players[i].WinRatio);
+                                    sw.WriteLine("{0},{1},{2},{3},{4}", sim.Players[i].Udemae, sim.Players[i].UdemaePoint, sim.Players[i].Strength, sim.Players[i].WinRatio, sim.Players[i].IsCountStop);
                                 }
                             }
                         }
@@ -108,7 +108,7 @@ namespace SplatoonSim
         public Func<double> PlayerStrengthFunc;
         public Sim()
         {
-            PlayerStrengthFunc = () => GB.Random.NextNormal() * PlayerStrengthDeviation;
+            PlayerStrengthFunc = () => (GB.Random.NextDouble()-0.5)*PlayerStrengthDeviation*4;
             Players = new List<Player>(PlayerCount);
             for (int i = 0; i < PlayerCount; i++)
             {
@@ -141,11 +141,11 @@ namespace SplatoonSim
             SearchBattle();
             Battles.Sort((Battle x, Battle y) =>
             {
-                if (x.IsFull != y.IsFull)
+                //if (x.IsFull != y.IsFull)
                 {
                     return x.IsFull.CompareTo(y.IsFull);
                 }
-                else return y.Udemae.CompareTo(x.Udemae);
+                //else return y.Udemae.CompareTo(x.Udemae);
             }
             );
             foreach (var item in Battles.Where(p => p.IsFull).ToList())

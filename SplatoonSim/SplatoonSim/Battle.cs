@@ -15,7 +15,7 @@ namespace SplatoonSim
         public bool IsFull { get { return isFull; } }
         public Udemae Udemae;
 
-        public const double StrengthDeviation = 10;
+        public const double StrengthDeviation = 3;
 
         public Battle(Udemae udemae)
         {
@@ -35,7 +35,7 @@ namespace SplatoonSim
         {
             if (IsFull) return false;
             var i = (int)udemae - (int)Udemae;
-            return i >= 0 && i <= 3;
+            return i >= -1 && i <= 2;
 
         }
 
